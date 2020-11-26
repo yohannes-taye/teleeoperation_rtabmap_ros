@@ -62,7 +62,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
 #include <rtabmap_ros/Cloud.h>
+#include <string>
+#include <sstream>
 
+namespace patch
+{
+    template < typename T > std::string to_string( const T& n )
+    {
+        std::ostringstream stm ;
+        stm << n ;
+        return stm.str() ;
+    }
+}
 
 namespace rtabmap_ros
 {
@@ -261,6 +272,8 @@ void MapCloudDisplay::onInitialize()
 	updateBillboardSize();
 	updateAlpha();
 	ros::NodeHandle nh;
+
+	
 	cloudPub_ = nh.advertise<rtabmap_ros::Cloud>("cloud_new", 1);
 	cloudPosePub_ = nh.advertise<rtabmap_ros::CloudPose>("cloud_pose_new", 1);
 
@@ -708,6 +721,8 @@ void MapCloudDisplay::update( float wall_dt, float ros_dt )
 
 
 				std::vector<rtabmap_ros::Point> points;
+				std::ostringstream oss;
+				rtabmap_ros::Point pt;
 				for(std::vector<rviz::PointCloud::Point>::iterator it = cloud_info->transformed_points_.begin(); it != cloud_info->transformed_points_.end(); ++it){
 					uint32_t RGBA = it->color.getAsRGBA();
 					uint8_t R = RGBA >> 24; 
@@ -715,18 +730,27 @@ void MapCloudDisplay::update( float wall_dt, float ros_dt )
 					uint8_t B = RGBA >> 8; 
 					uint8_t A = RGBA; 
 
-
-					rtabmap_ros::Point pt;
+					
+					
+					
+					
+					oss << "[" << it->position.x << "," << it->position.y << "," << it->position.z << "," << (int)R <<","<< (int)G<<","<<(int)B<<"]"; 
+					
+					//pt.data = patch::to_string(it->position.x) + "," + patch::to_string(it->position.y) + "," + patch::to_string(it->position.z) + "," + patch::to_string(R) + "," + patch::to_string(G) + "," + patch::to_string(B);
+					
+					/*
 					pt.x = it->position.x;
 					pt.y = it->position.y; 
 					pt.z = it->position.z; 
 					pt.R = R; 
 					pt.G = G; 
 					pt.B = B; 
-
+					*/
 					
-					points.push_back(pt);
-
+					
+					
+					
+					
 					// cloud_data.push_back();
 					// cloud_data.push_back(it->position.y); 
 					// cloud_data.push_back(it->position.z);
@@ -742,8 +766,14 @@ void MapCloudDisplay::update( float wall_dt, float ros_dt )
 					// ROS_INFO("**************************\nx: %f\ny: %f\nz: %f\n R: %f\n G: %f\nB: %f\n **************************", it->position.x, it->position.y, it->position.z, R, G, B);
 					
 				}
+
+				pt.data = oss.str();
+				points.push_back(pt);
+
+
 				rtabmap_ros::CloudPtr msg(new rtabmap_ros::Cloud);
 				msg->data = points;
+				//ROS_DEBUG("\n\n\n\n\n***************************************PUBLISHED*****************************************************");
 				msg->mapId = cloud_info->id_;
 				cloudPub_.publish(msg);
 				
@@ -871,6 +901,8 @@ void MapCloudDisplay::update( float wall_dt, float ros_dt )
 						orientationVector.push_back(poseOrientation.z);
 						
 						//NODELET_INFO("Sending RtabmapInfo msg (last_id=%d)...", stat.refImageId());
+						
+						
 						rtabmap_ros::CloudPosePtr msg(new rtabmap_ros::CloudPose);
 					 	msg->rotationMatrix = orientationVector; 
 						msg->transformMatrix = transformVector; 

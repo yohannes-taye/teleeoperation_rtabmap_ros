@@ -107,7 +107,7 @@ add_message_files(
    GPS.msg
    Path.msg
    EnvSensor.msg
-   Cloud.msg 
+   Cloud.msg
    Point.msg
    CloudPose.msg
 )
