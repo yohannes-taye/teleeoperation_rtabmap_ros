@@ -907,7 +907,7 @@ void MapCloudDisplay::update( float wall_dt, float ros_dt )
 				else
 				{
 					++iter;
-				}
+				}  
 			}
 		}
 	}
